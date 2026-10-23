@@ -58,7 +58,7 @@ export function ClientsTable({ kind }: { kind: ClientKind }) {
 						<tbody>
 							{clients.map((client, index) => (
 								<tr key={index}>
-									<td>{client.nombre}</td>
+									<td>{client.nombre.toLocaleUpperCase('es-AR')}</td>
 									<td>{client.cuit}</td>
 								</tr>
 							))}

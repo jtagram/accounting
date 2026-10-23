@@ -56,7 +56,7 @@ describe('LoadClientsForm', () => {
 			'Se cargaron 2 clientes en memoria. La lista se borra automáticamente a las 2 horas.',
 		);
 		expect(textarea).toHaveValue('');
-		expect(screen.getByText('ana')).toBeInTheDocument();
+		expect(screen.getByText('ANA')).toBeInTheDocument();
 		expect(screen.queryByText(SECRET)).not.toBeInTheDocument();
 	});
 
@@ -69,8 +69,8 @@ describe('LoadClientsForm', () => {
 		await userEvent.click(load);
 
 		await waitFor(() => expect(screen.getByText('Clientes cargados: 1')).toBeInTheDocument());
-		expect(screen.getByText('carla')).toBeInTheDocument();
-		expect(screen.queryByText('ana')).not.toBeInTheDocument();
+		expect(screen.getByText('CARLA')).toBeInTheDocument();
+		expect(screen.queryByText('ANA')).not.toBeInTheDocument();
 	});
 
 	it('loads from a selected file', async () => {
@@ -84,7 +84,7 @@ describe('LoadClientsForm', () => {
 		expect(await screen.findByRole('status')).toHaveTextContent(
 			'Se cargaron 1 clientes en memoria. La lista se borra automáticamente a las 2 horas.',
 		);
-		expect(screen.getByText('desde archivo')).toBeInTheDocument();
+		expect(screen.getByText('DESDE ARCHIVO')).toBeInTheDocument();
 	});
 
 	it('shows validation errors without echoing values and keeps the previous list', async () => {
@@ -99,7 +99,7 @@ describe('LoadClientsForm', () => {
 		const alert = await screen.findByRole('alert');
 		expect(alert).toHaveTextContent('Cliente 1: el campo cuit es inválido.');
 		expect(alert).not.toHaveTextContent(SECRET);
-		expect(screen.getByText('ana')).toBeInTheDocument();
+		expect(screen.getByText('ANA')).toBeInTheDocument();
 	});
 
 	it('shows a located syntax error without echoing content and keeps the previous list', async () => {
@@ -116,7 +116,7 @@ describe('LoadClientsForm', () => {
 			'JSON inválido en la línea 2, columna 1: comillas inesperadas, probablemente falta una coma entre elementos.',
 		);
 		expect(alert).not.toHaveTextContent(SECRET);
-		expect(screen.getByText('ana')).toBeInTheDocument();
+		expect(screen.getByText('ANA')).toBeInTheDocument();
 		expect(screen.getByText('Clientes cargados: 1')).toBeInTheDocument();
 	});
 
@@ -134,8 +134,8 @@ describe('LoadClientsForm', () => {
 		expect(alert).toHaveTextContent('Clientes 1 y 2: el cuit está repetido.');
 		expect(alert).not.toHaveTextContent(CUITS.carla);
 		expect(alert).not.toHaveTextContent(SECRET);
-		expect(screen.getByText('ana')).toBeInTheDocument();
-		expect(screen.queryByText('carla')).not.toBeInTheDocument();
+		expect(screen.getByText('ANA')).toBeInTheDocument();
+		expect(screen.queryByText('CARLA')).not.toBeInTheDocument();
 		expect(screen.getByText('Clientes cargados: 1')).toBeInTheDocument();
 	});
 

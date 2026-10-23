@@ -45,7 +45,8 @@ describe('ClientsTable', () => {
 				<ClientsTable kind='arca' />
 			</ClientsProvider>,
 		);
-		expect(screen.getByText('juan perez')).toBeInTheDocument();
+		expect(screen.getByText('JUAN PEREZ')).toBeInTheDocument();
+		expect(screen.queryByText('juan perez')).not.toBeInTheDocument();
 		expect(screen.getByText('20123456789')).toBeInTheDocument();
 		expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
 			'Nombre',
@@ -82,7 +83,7 @@ describe('ClientsTable', () => {
 		);
 		await userEvent.click(screen.getByRole('button', { name: 'Limpiar lista' }));
 		expect(screen.getByText(/No hay clientes cargados/)).toBeInTheDocument();
-		expect(screen.queryByText('juan perez')).not.toBeInTheDocument();
+		expect(screen.queryByText('JUAN PEREZ')).not.toBeInTheDocument();
 	});
 
 	it('shows when the list will be erased (HH:mm)', () => {
