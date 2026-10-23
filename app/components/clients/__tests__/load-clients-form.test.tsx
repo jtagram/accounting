@@ -31,15 +31,18 @@ function setup(kind: 'arca' | 'arca-agip' = 'arca') {
 		</ClientsProvider>,
 	);
 	return {
-		textarea: screen.getByLabelText('O pegue el JSON'),
 		file: screen.getByLabelText('Archivo JSON'),
 		load: screen.getByRole('button', { name: 'Cargar' }),
 	};
 }
 
-async function paste(textarea: HTMLElement, value: string) {
-	await userEvent.click(textarea);
-	await userEvent.paste(value);
+function fileInput() {
+	// The input is remounted after a successful load, so always query it fresh.
+	return screen.getByLabelText<HTMLInputElement>('Archivo JSON');
+}
+
+async function upload(content: string, name = 'clientes.json') {
+	await userEvent.upload(fileInput(), new File([content], name, { type: 'application/json' }));
 }
 
 describe('LoadClientsForm', () => {
@@ -47,25 +50,25 @@ describe('LoadClientsForm', () => {
 		vi.restoreAllMocks();
 	});
 
-	it('loads pasted JSON, reports only the count and clears the textarea', async () => {
-		const { textarea, load } = setup();
-		await paste(textarea, json([client('ana'), client('beto')]));
+	it('loads a file, reports only the count and clears the file input', async () => {
+		const { load } = setup();
+		await upload(json([client('ana'), client('beto')]));
 		await userEvent.click(load);
 
 		expect(await screen.findByRole('status')).toHaveTextContent(
 			'Se cargaron 2 clientes en memoria. La lista se borra automáticamente a las 2 horas.',
 		);
-		expect(textarea).toHaveValue('');
+		expect(fileInput().files).toHaveLength(0);
 		expect(screen.getByText('ANA')).toBeInTheDocument();
 		expect(screen.queryByText(SECRET)).not.toBeInTheDocument();
 	});
 
 	it('replaces the previous list on a new load', async () => {
-		const { textarea, load } = setup();
-		await paste(textarea, json([client('ana'), client('beto')]));
+		const { load } = setup();
+		await upload(json([client('ana'), client('beto')]));
 		await userEvent.click(load);
 		await screen.findByRole('status');
-		await paste(textarea, json([client('carla')]));
+		await upload(json([client('carla')]));
 		await userEvent.click(load);
 
 		await waitFor(() => expect(screen.getByText('Clientes cargados: 1')).toBeInTheDocument());
@@ -73,27 +76,13 @@ describe('LoadClientsForm', () => {
 		expect(screen.queryByText('ANA')).not.toBeInTheDocument();
 	});
 
-	it('loads from a selected file', async () => {
-		const { file, load } = setup();
-		await userEvent.upload(
-			file,
-			new File([json([client('desde archivo')])], 'clientes.json', { type: 'application/json' }),
-		);
-		await userEvent.click(load);
-
-		expect(await screen.findByRole('status')).toHaveTextContent(
-			'Se cargaron 1 clientes en memoria. La lista se borra automáticamente a las 2 horas.',
-		);
-		expect(screen.getByText('DESDE ARCHIVO')).toBeInTheDocument();
-	});
-
 	it('shows validation errors without echoing values and keeps the previous list', async () => {
-		const { textarea, load } = setup();
-		await paste(textarea, json([client('ana')]));
+		const { load } = setup();
+		await upload(json([client('ana')]));
 		await userEvent.click(load);
 		await screen.findByRole('status');
 
-		await paste(textarea, json([{ nombre: 'x', cuit: `bad-${SECRET}`, claveFiscal: SECRET }]));
+		await upload(json([{ nombre: 'x', cuit: `bad-${SECRET}`, claveFiscal: SECRET }]));
 		await userEvent.click(load);
 
 		const alert = await screen.findByRole('alert');
@@ -103,12 +92,12 @@ describe('LoadClientsForm', () => {
 	});
 
 	it('shows a located syntax error without echoing content and keeps the previous list', async () => {
-		const { textarea, load } = setup();
-		await paste(textarea, json([client('ana')]));
+		const { load } = setup();
+		await upload(json([client('ana')]));
 		await userEvent.click(load);
 		await screen.findByRole('status');
 
-		await paste(textarea, `{"clientes": [{"nombre": "${SECRET}"\n"cuit": 1}]}`);
+		await upload(`{"clientes": [{"nombre": "${SECRET}"\n"cuit": 1}]}`);
 		await userEvent.click(load);
 
 		const alert = await screen.findByRole('alert');
@@ -121,13 +110,13 @@ describe('LoadClientsForm', () => {
 	});
 
 	it('rejects duplicate cuits and keeps the previous list', async () => {
-		const { textarea, load } = setup();
-		await paste(textarea, json([client('ana')]));
+		const { load } = setup();
+		await upload(json([client('ana')]));
 		await userEvent.click(load);
 		await screen.findByRole('status');
 
 		const dup = { ...client('beto'), cuit: CUITS.carla };
-		await paste(textarea, json([client('carla'), dup]));
+		await upload(json([client('carla'), dup]));
 		await userEvent.click(load);
 
 		const alert = await screen.findByRole('alert');
@@ -139,17 +128,56 @@ describe('LoadClientsForm', () => {
 		expect(screen.getByText('Clientes cargados: 1')).toBeInTheDocument();
 	});
 
-	it('asks for input when nothing was provided', async () => {
+	it('has no paste textarea', () => {
+		setup();
+		expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+	});
+
+	it('asks for a file when none was selected', async () => {
 		const { load } = setup();
 		await userEvent.click(load);
+		expect(await screen.findByRole('alert')).toHaveTextContent('Seleccione un archivo JSON.');
+	});
+
+	it('rejects an empty file and keeps the previous list', async () => {
+		const { load } = setup();
+		await upload(json([client('ana')]));
+		await userEvent.click(load);
+		await screen.findByRole('status');
+
+		await upload('   ');
+		await userEvent.click(load);
+		expect(await screen.findByRole('alert')).toHaveTextContent('El archivo está vacío.');
+		expect(screen.getByText('ANA')).toBeInTheDocument();
+	});
+
+	it('rejects oversize files without reading them', async () => {
+		const { load } = setup();
+		const big = new File(['x'], 'grande.json', { type: 'application/json' });
+		Object.defineProperty(big, 'size', { value: 5 * 1024 * 1024 + 1 });
+		const textSpy = vi.spyOn(big, 'text');
+		await userEvent.upload(fileInput(), big);
+		await userEvent.click(load);
 		expect(await screen.findByRole('alert')).toHaveTextContent(
-			'Seleccione un archivo o pegue el JSON.',
+			'El archivo es demasiado grande (máximo 5 MB).',
 		);
+		expect(textSpy).not.toHaveBeenCalled();
+	});
+
+	it('shows a generic message when reading fails', async () => {
+		const { load } = setup();
+		const broken = new File(['{}'], 'roto.json', { type: 'application/json' });
+		vi.spyOn(broken, 'text').mockRejectedValue(new Error(SECRET));
+		await userEvent.upload(fileInput(), broken);
+		await userEvent.click(load);
+		const alert = await screen.findByRole('alert');
+		expect(alert).toHaveTextContent('No se pudo leer el archivo.');
+		expect(alert).not.toHaveTextContent(SECRET);
 	});
 
 	it('requires the ARCA-AGIP shape for that kind', async () => {
-		const { textarea, load } = setup('arca-agip');
-		await paste(textarea, json([client('ana')]));
+		const { load } = setup('arca-agip');
+		await upload(json([client('ana')]));
 		await userEvent.click(load);
 		expect(await screen.findByRole('alert')).toHaveTextContent(
 			'Cliente 1: falta el campo claveCiudad.',
@@ -162,8 +190,8 @@ describe('LoadClientsForm', () => {
 		const fetchSpy = vi.fn();
 		vi.stubGlobal('fetch', fetchSpy);
 
-		const { textarea, load } = setup();
-		await paste(textarea, json([client('ana')]));
+		const { load } = setup();
+		await upload(json([client('ana')]));
 		await userEvent.click(load);
 		await screen.findByRole('status');
 		await userEvent.click(screen.getByRole('button', { name: 'Limpiar lista' }));

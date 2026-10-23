@@ -82,7 +82,7 @@ describe('parseClientsJson', () => {
 	it('rejects empty and whitespace-only input with its own message', () => {
 		const expected = {
 			ok: false,
-			errors: ['El texto está vacío: pegue o cargue el JSON de clientes.'],
+			errors: ['El archivo está vacío: cargue el JSON de clientes.'],
 		};
 		expect(parseClientsJson('arca', '')).toEqual(expected);
 		expect(parseClientsJson('arca', ' \n\t ')).toEqual(expected);

@@ -108,7 +108,7 @@ function findDuplicateCuitErrors(items: unknown[]): string[] {
 }
 
 const GENERIC_JSON_ERROR = 'El texto no es un JSON válido.';
-const EMPTY_JSON_ERROR = 'El texto está vacío: pegue o cargue el JSON de clientes.';
+const EMPTY_JSON_ERROR = 'El archivo está vacío: cargue el JSON de clientes.';
 
 class JsonSyntaxError extends Error {
 	constructor(readonly position: number) {

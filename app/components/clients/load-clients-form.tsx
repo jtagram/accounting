@@ -10,13 +10,13 @@ import { parseClientsJson } from '@/app/lib/clients/validators';
 import { PdfSources } from './pdf-sources';
 
 const MAX_VISIBLE_ERRORS = 10;
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
 
 type Feedback = { type: 'success'; count: number } | { type: 'error'; errors: string[] };
 
 export function LoadClientsForm({ kind }: { kind: ClientKind }) {
 	const config = CLIENT_KIND_CONFIG[kind];
 	const { replace } = useClients(kind);
-	const [text, setText] = useState('');
 	const [file, setFile] = useState<File | null>(null);
 	// Changing the key remounts the file input so the chosen file is dropped.
 	const [fileInputKey, setFileInputKey] = useState(0);
@@ -26,25 +26,27 @@ export function LoadClientsForm({ kind }: { kind: ClientKind }) {
 		event.preventDefault();
 		setFeedback(null);
 
-		if (file && text.trim()) {
+		if (!file) {
+			setFeedback({ type: 'error', errors: ['Seleccione un archivo JSON.'] });
+			return;
+		}
+		if (file.size > MAX_FILE_BYTES) {
 			setFeedback({
 				type: 'error',
-				errors: ['Use solo una fuente: el archivo o el texto pegado.'],
+				errors: ['El archivo es demasiado grande (máximo 5 MB).'],
 			});
 			return;
 		}
 
-		let source = text;
-		if (file) {
-			try {
-				source = await file.text();
-			} catch {
-				setFeedback({ type: 'error', errors: ['No se pudo leer el archivo.'] });
-				return;
-			}
+		let source: string;
+		try {
+			source = await file.text();
+		} catch {
+			setFeedback({ type: 'error', errors: ['No se pudo leer el archivo.'] });
+			return;
 		}
 		if (!source.trim()) {
-			setFeedback({ type: 'error', errors: ['Seleccione un archivo o pegue el JSON.'] });
+			setFeedback({ type: 'error', errors: ['El archivo está vacío.'] });
 			return;
 		}
 
@@ -55,7 +57,6 @@ export function LoadClientsForm({ kind }: { kind: ClientKind }) {
 		}
 
 		replace(result.clients);
-		setText('');
 		setFile(null);
 		setFileInputKey((current) => current + 1);
 		setFeedback({ type: 'success', count: result.clients.length });
@@ -80,21 +81,6 @@ export function LoadClientsForm({ kind }: { kind: ClientKind }) {
 					type='file'
 					accept='.json,application/json'
 					onChange={(event) => setFile((event.target as HTMLInputElement).files?.[0] ?? null)}
-				/>
-			</Form.Group>
-
-			<Form.Group
-				className='mb-3'
-				controlId={`${kind}-text`}
-			>
-				<Form.Label>O pegue el JSON</Form.Label>
-				<Form.Control
-					as='textarea'
-					rows={10}
-					spellCheck={false}
-					autoComplete='off'
-					value={text}
-					onChange={(event) => setText(event.target.value)}
 				/>
 			</Form.Group>
 
