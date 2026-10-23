@@ -49,6 +49,7 @@ describe('ClientsTable', () => {
 		expect(screen.queryByText('juan perez')).not.toBeInTheDocument();
 		expect(screen.getByText('20123456789')).toBeInTheDocument();
 		expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+			'',
 			'Nombre',
 			'CUIT',
 		]);
@@ -66,7 +67,7 @@ describe('ClientsTable', () => {
 				<ClientsTable kind='arca-agip' />
 			</ClientsProvider>,
 		);
-		expect(screen.getAllByRole('columnheader')).toHaveLength(2);
+		expect(screen.getAllByRole('columnheader')).toHaveLength(3);
 		expect(screen.queryByText('top-secret')).not.toBeInTheDocument();
 		expect(screen.queryByText('city-secret')).not.toBeInTheDocument();
 	});
