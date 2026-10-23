@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { ClientsProvider, useClients } from '@/app/lib/clients/clients-provider';
 import { CLIENT_KIND_CONFIG, type ClientKind, type ClientOf } from '@/app/lib/clients/models';
 
-import { ClientsTable, MASKED_SECRET } from '../clients-table';
+import { ClientsTable } from '../clients-table';
 
 function Seed<K extends ClientKind>({ kind, clients }: { kind: K; clients: ClientOf<K>[] }) {
 	const { replace } = useClients(kind);
@@ -35,7 +35,7 @@ describe('ClientsTable', () => {
 		},
 	);
 
-	it('shows nombre and cuit in clear, masks claves and shows the count', () => {
+	it('shows only nombre and cuit, never the claves, and shows the count', () => {
 		render(
 			<ClientsProvider>
 				<Seed
@@ -47,12 +47,15 @@ describe('ClientsTable', () => {
 		);
 		expect(screen.getByText('juan perez')).toBeInTheDocument();
 		expect(screen.getByText('20123456789')).toBeInTheDocument();
-		expect(screen.getByText(MASKED_SECRET)).toBeInTheDocument();
+		expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+			'Nombre',
+			'CUIT',
+		]);
 		expect(screen.queryByText('top-secret')).not.toBeInTheDocument();
 		expect(screen.getByText('Clientes cargados: 1')).toBeInTheDocument();
 	});
 
-	it('renders one masked column per clave for ARCA-AGIP', () => {
+	it('does not render any clave column for ARCA-AGIP', () => {
 		render(
 			<ClientsProvider>
 				<Seed
@@ -62,7 +65,8 @@ describe('ClientsTable', () => {
 				<ClientsTable kind='arca-agip' />
 			</ClientsProvider>,
 		);
-		expect(screen.getAllByText(MASKED_SECRET)).toHaveLength(2);
+		expect(screen.getAllByRole('columnheader')).toHaveLength(2);
+		expect(screen.queryByText('top-secret')).not.toBeInTheDocument();
 		expect(screen.queryByText('city-secret')).not.toBeInTheDocument();
 	});
 

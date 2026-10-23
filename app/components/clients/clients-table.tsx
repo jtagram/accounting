@@ -6,8 +6,6 @@ import { Alert, Button, Table } from 'react-bootstrap';
 import { useClients } from '@/app/lib/clients/clients-provider';
 import { CLIENT_KIND_CONFIG, type ClientKind } from '@/app/lib/clients/models';
 
-export const MASKED_SECRET = '••••••••';
-
 const EXPIRY_TIME_FORMAT = new Intl.DateTimeFormat('es-AR', {
 	hour: '2-digit',
 	minute: '2-digit',
@@ -55,9 +53,6 @@ export function ClientsTable({ kind }: { kind: ClientKind }) {
 							<tr>
 								<th>Nombre</th>
 								<th>CUIT</th>
-								{config.secretFields.map((field) => (
-									<th key={field.key}>{field.label}</th>
-								))}
 							</tr>
 						</thead>
 						<tbody>
@@ -65,9 +60,6 @@ export function ClientsTable({ kind }: { kind: ClientKind }) {
 								<tr key={index}>
 									<td>{client.nombre}</td>
 									<td>{client.cuit}</td>
-									{config.secretFields.map((field) => (
-										<td key={field.key}>{MASKED_SECRET}</td>
-									))}
 								</tr>
 							))}
 						</tbody>
