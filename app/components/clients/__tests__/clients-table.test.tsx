@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
@@ -14,6 +14,11 @@ function Seed<K extends ClientKind>({ kind, clients }: { kind: K; clients: Clien
 		replace(clients);
 	}, []);
 	return null;
+}
+
+// The PDF sources table renders first; the clients table is the last one.
+function clientsTable() {
+	return screen.getAllByRole('table').at(-1)!;
 }
 
 const arca = [{ nombre: 'juan perez', cuit: '20123456789', claveFiscal: 'top-secret' }];
@@ -48,7 +53,7 @@ describe('ClientsTable', () => {
 		expect(screen.getByText('JUAN PEREZ')).toBeInTheDocument();
 		expect(screen.queryByText('juan perez')).not.toBeInTheDocument();
 		expect(screen.getByText('20123456789')).toBeInTheDocument();
-		expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+		expect(within(clientsTable()).getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
 			'',
 			'Nombre',
 			'CUIT',
@@ -67,7 +72,7 @@ describe('ClientsTable', () => {
 				<ClientsTable kind='arca-agip' />
 			</ClientsProvider>,
 		);
-		expect(screen.getAllByRole('columnheader')).toHaveLength(3);
+		expect(within(clientsTable()).getAllByRole('columnheader')).toHaveLength(3);
 		expect(screen.queryByText('top-secret')).not.toBeInTheDocument();
 		expect(screen.queryByText('city-secret')).not.toBeInTheDocument();
 	});

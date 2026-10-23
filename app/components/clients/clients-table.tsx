@@ -9,6 +9,8 @@ import { useClients } from '@/app/lib/clients/clients-provider';
 import { CLIENT_KIND_CONFIG, type ClientKind } from '@/app/lib/clients/models';
 import { type ProcessOutcome, submitProcess } from '@/app/lib/clients/submit-process';
 
+import { PdfSources } from './pdf-sources';
+
 const EXPIRY_TIME_FORMAT = new Intl.DateTimeFormat('es-AR', {
 	hour: '2-digit',
 	minute: '2-digit',
@@ -107,6 +109,7 @@ export function ClientsTable({ kind }: { kind: ClientKind }) {
 	return (
 		<div>
 			<h1 className='h4 mb-3'>{config.processTitle}</h1>
+			<PdfSources kind={kind} />
 
 			{clients.length === 0 ? (
 				<Alert

@@ -7,6 +7,8 @@ import { useClients } from '@/app/lib/clients/clients-provider';
 import { CLIENT_KIND_CONFIG, type ClientKind } from '@/app/lib/clients/models';
 import { parseClientsJson } from '@/app/lib/clients/validators';
 
+import { PdfSources } from './pdf-sources';
+
 const MAX_VISIBLE_ERRORS = 10;
 
 type Feedback = { type: 'success'; count: number } | { type: 'error'; errors: string[] };
@@ -62,6 +64,7 @@ export function LoadClientsForm({ kind }: { kind: ClientKind }) {
 	return (
 		<Form onSubmit={handleSubmit}>
 			<h1 className='h4 mb-3'>{config.loadTitle}</h1>
+			<PdfSources kind={kind} />
 			<p className='text-muted'>
 				Los datos se leen en este navegador y quedan solo en memoria: no se envían ni se guardan, y
 				se pierden al recargar la página.
