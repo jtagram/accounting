@@ -26,6 +26,9 @@ describe("proxy", () => {
   });
 
   it("guards the home route and every menu route", () => {
-    expect(config.matcher).toEqual(["/", ...NAV_ITEMS.map((item) => item.href)]);
+    expect(NAV_ITEMS).toHaveLength(6);
+    expect([...config.matcher].sort()).toEqual(
+      ["/", ...NAV_ITEMS.map((item) => item.href)].sort(),
+    );
   });
 });

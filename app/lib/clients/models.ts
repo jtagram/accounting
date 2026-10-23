@@ -63,12 +63,25 @@ function navItem(id: NavItemId) {
 	return item;
 }
 
+// Page titles are descriptive and independent from the short sidebar labels.
+const PAGE_TITLES: Record<ClientKind, { load: string; process: string }> = {
+	arca: { load: 'Cargar clientes ARCA en memoria', process: 'Procesar clientes ARCA' },
+	'arca-agip': {
+		load: 'Cargar clientes ARCA-AGIP en memoria',
+		process: 'Procesar clientes ARCA-AGIP',
+	},
+	'arca-arba': {
+		load: 'Cargar clientes ARCA-ARBA en memoria',
+		process: 'Procesar clientes ARCA-ARBA',
+	},
+};
+
 function buildConfig(kind: ClientKind): ClientKindConfig {
 	const load = navItem(NAV_IDS[kind].load);
 	const process = navItem(NAV_IDS[kind].process);
 	return {
-		loadTitle: load.label,
-		processTitle: process.label,
+		loadTitle: PAGE_TITLES[kind].load,
+		processTitle: PAGE_TITLES[kind].process,
 		loadHref: load.href,
 		processHref: process.href,
 		secretFields: SECRET_FIELDS[kind],
