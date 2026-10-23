@@ -29,24 +29,18 @@ describe('Sidebar', () => {
 		});
 	});
 
-	it('renders the six links in order with their routes', () => {
+	it('renders one link per group in order with its route', () => {
 		render(<Sidebar />);
 
 		const links = screen.getAllByRole('link');
 		expect(links.map((link) => link.getAttribute('href'))).toEqual([
-			'/cargar-clientes-arca',
 			'/procesar-clientes-arca',
-			'/cargar-clientes-arca-agip',
 			'/procesar-clientes-arca-agip',
-			'/cargar-clientes-arca-arba',
 			'/procesar-clientes-arca-arba',
 		]);
 		expect(links.map((link) => link.textContent)).toEqual([
-			'Cargar clientes ARCA en memoria',
 			'Procesar clientes ARCA',
-			'Cargar clientes ARCA-AGIP en memoria',
 			'Procesar clientes ARCA-AGIP',
-			'Cargar clientes ARCA-ARBA en memoria',
 			'Procesar clientes ARCA-ARBA',
 		]);
 	});

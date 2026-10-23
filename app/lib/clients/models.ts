@@ -34,9 +34,7 @@ export interface SecretField {
 }
 
 export interface ClientKindConfig {
-	loadTitle: string;
 	processTitle: string;
-	loadHref: string;
 	processHref: string;
 	secretFields: readonly SecretField[];
 }
@@ -49,10 +47,10 @@ const SECRET_FIELDS: Record<ClientKind, readonly SecretField[]> = {
 	'arca-arba': [FISCAL_KEY, { key: 'claveCit', label: 'Clave CIT' }],
 };
 
-const NAV_IDS: Record<ClientKind, { load: NavItemId; process: NavItemId }> = {
-	arca: { load: 'load-arca-clients', process: 'process-arca-clients' },
-	'arca-agip': { load: 'load-arca-agip-clients', process: 'process-arca-agip-clients' },
-	'arca-arba': { load: 'load-arca-arba-clients', process: 'process-arca-arba-clients' },
+const NAV_IDS: Record<ClientKind, NavItemId> = {
+	arca: 'process-arca-clients',
+	'arca-agip': 'process-arca-agip-clients',
+	'arca-arba': 'process-arca-arba-clients',
 };
 
 function navItem(id: NavItemId) {
@@ -64,26 +62,16 @@ function navItem(id: NavItemId) {
 }
 
 // Page titles are descriptive and independent from the short sidebar labels.
-const PAGE_TITLES: Record<ClientKind, { load: string; process: string }> = {
-	arca: { load: 'Cargar clientes ARCA en memoria', process: 'Procesar clientes ARCA' },
-	'arca-agip': {
-		load: 'Cargar clientes ARCA-AGIP en memoria',
-		process: 'Procesar clientes ARCA-AGIP',
-	},
-	'arca-arba': {
-		load: 'Cargar clientes ARCA-ARBA en memoria',
-		process: 'Procesar clientes ARCA-ARBA',
-	},
+const PAGE_TITLES: Record<ClientKind, string> = {
+	arca: 'Procesar clientes ARCA',
+	'arca-agip': 'Procesar clientes ARCA-AGIP',
+	'arca-arba': 'Procesar clientes ARCA-ARBA',
 };
 
 function buildConfig(kind: ClientKind): ClientKindConfig {
-	const load = navItem(NAV_IDS[kind].load);
-	const process = navItem(NAV_IDS[kind].process);
 	return {
-		loadTitle: PAGE_TITLES[kind].load,
-		processTitle: PAGE_TITLES[kind].process,
-		loadHref: load.href,
-		processHref: process.href,
+		processTitle: PAGE_TITLES[kind],
+		processHref: navItem(NAV_IDS[kind]).href,
 		secretFields: SECRET_FIELDS[kind],
 	};
 }

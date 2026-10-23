@@ -25,8 +25,12 @@ describe("proxy", () => {
     expect(res.headers.get("x-middleware-next")).toBe("1");
   });
 
+  it("does not list the legacy load routes (redirected before the proxy)", () => {
+    expect(config.matcher.some((path) => path.startsWith("/cargar-clientes"))).toBe(false);
+  });
+
   it("guards the home route and every menu route", () => {
-    expect(NAV_ITEMS).toHaveLength(6);
+    expect(NAV_ITEMS).toHaveLength(3);
     expect([...config.matcher].sort()).toEqual(
       ["/", ...NAV_ITEMS.map((item) => item.href)].sort(),
     );

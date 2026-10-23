@@ -25,7 +25,7 @@ const arca = [{ nombre: 'juan perez', cuit: '20123456789', claveFiscal: 'top-sec
 
 describe('ClientsTable', () => {
 	it.each(Object.keys(CLIENT_KIND_CONFIG) as ClientKind[])(
-		'shows an empty state linking to the load page for %s',
+		'shows an empty state pointing to the header file selector for %s',
 		(kind) => {
 			render(
 				<ClientsProvider>
@@ -33,10 +33,8 @@ describe('ClientsTable', () => {
 				</ClientsProvider>,
 			);
 			expect(screen.getByText(/No hay clientes cargados/)).toBeInTheDocument();
-			expect(screen.getByRole('link', { name: 'Cargar clientes' })).toHaveAttribute(
-				'href',
-				CLIENT_KIND_CONFIG[kind].loadHref,
-			);
+			expect(screen.getByText(/selector de la esquina superior derecha/)).toBeInTheDocument();
+			expect(screen.queryByRole('link')).not.toBeInTheDocument();
 		},
 	);
 

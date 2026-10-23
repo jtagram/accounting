@@ -5,7 +5,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ClientsProvider } from '@/app/lib/clients/clients-provider';
 
 import { ClientsTable } from '../clients-table';
-import { LoadClientsForm } from '../load-clients-form';
 
 const SECRET = 'top-secret-key';
 
@@ -26,7 +25,6 @@ function client(nombre: string, extra: Record<string, string> = { claveFiscal: S
 function setup(kind: 'arca' | 'arca-agip' = 'arca') {
 	render(
 		<ClientsProvider>
-			<LoadClientsForm kind={kind} />
 			<ClientsTable kind={kind} />
 		</ClientsProvider>,
 	);
@@ -45,7 +43,7 @@ async function upload(content: string, name = 'clientes.json') {
 	await userEvent.upload(fileInput(), new File([content], name, { type: 'application/json' }));
 }
 
-describe('LoadClientsForm', () => {
+describe('ClientsFileLoader inside the process page', () => {
 	afterEach(() => {
 		vi.restoreAllMocks();
 	});
@@ -126,6 +124,24 @@ describe('LoadClientsForm', () => {
 		expect(screen.getByText('ANA')).toBeInTheDocument();
 		expect(screen.queryByText('CARLA')).not.toBeInTheDocument();
 		expect(screen.getByText('Clientes cargados: 1')).toBeInTheDocument();
+	});
+
+	it('renders the loader in the header row next to the page title', () => {
+		setup();
+		const heading = screen.getByRole('heading', { level: 1 });
+		expect(heading).toHaveTextContent('Procesar clientes ARCA');
+		expect(heading.parentElement).toContainElement(screen.getByLabelText('Archivo JSON'));
+		expect(heading.parentElement).toContainElement(screen.getByRole('button', { name: 'Cargar' }));
+	});
+
+	it('shows the empty state without a link to a load page', () => {
+		setup();
+		expect(
+			screen.getByText(
+				/No hay clientes cargados en memoria\. Seleccioná un archivo JSON con el selector de la esquina superior derecha\./,
+			),
+		).toBeInTheDocument();
+		expect(screen.queryByRole('link')).not.toBeInTheDocument();
 	});
 
 	it('has no paste textarea', () => {

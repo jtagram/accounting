@@ -17,9 +17,6 @@ export function proxy(request: NextRequest) {
 export const config = {
 	matcher: [
 		'/',
-		'/cargar-clientes-arca',
-		'/cargar-clientes-arca-agip',
-		'/cargar-clientes-arca-arba',
 		'/procesar-clientes-arca',
 		'/procesar-clientes-arca-agip',
 		'/procesar-clientes-arca-arba',

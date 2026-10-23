@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import { Alert, Button, Form, Spinner, Table } from 'react-bootstrap';
 
 import { buildProcessPayload } from '@/app/lib/clients/build-process-payload';
@@ -9,6 +8,7 @@ import { useClients } from '@/app/lib/clients/clients-provider';
 import { CLIENT_KIND_CONFIG, type ClientKind } from '@/app/lib/clients/models';
 import { type ProcessOutcome, submitProcess } from '@/app/lib/clients/submit-process';
 
+import { ClientsFileLoader, type LoaderFeedback, LoaderFeedbackAlert } from './clients-file-loader';
 import { PdfSources } from './pdf-sources';
 
 const EXPIRY_TIME_FORMAT = new Intl.DateTimeFormat('es-AR', {
@@ -67,6 +67,7 @@ export function ClientsTable({ kind }: { kind: ClientKind }) {
 	const { selected, toggle, setAll } = useSelection(clients);
 	const [pendingCount, setPendingCount] = useState<number | null>(null);
 	const [feedback, setFeedback] = useState<Feedback | null>(null);
+	const [loadFeedback, setLoadFeedback] = useState<LoaderFeedback | null>(null);
 	const inFlight = useRef(false);
 	const mounted = useRef(true);
 	const headerCheckbox = useRef<HTMLInputElement>(null);
@@ -108,7 +109,14 @@ export function ClientsTable({ kind }: { kind: ClientKind }) {
 
 	return (
 		<div>
-			<h1 className='h4 mb-3'>{config.processTitle}</h1>
+			<div className='d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3'>
+				<h1 className='h4 mb-0'>{config.processTitle}</h1>
+				<ClientsFileLoader
+					kind={kind}
+					onFeedback={setLoadFeedback}
+				/>
+			</div>
+			<LoaderFeedbackAlert feedback={loadFeedback} />
 			<PdfSources kind={kind} />
 
 			{clients.length === 0 ? (
@@ -116,7 +124,8 @@ export function ClientsTable({ kind }: { kind: ClientKind }) {
 					variant='info'
 					role='note'
 				>
-					No hay clientes cargados en memoria. <Link href={config.loadHref}>Cargar clientes</Link>
+					No hay clientes cargados en memoria. Seleccioná un archivo JSON con el selector de la esquina superior
+						derecha.
 				</Alert>
 			) : (
 				<>

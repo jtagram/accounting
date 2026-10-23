@@ -6,7 +6,6 @@ import { ClientsProvider, useClients } from '@/app/lib/clients/clients-provider'
 import type { ClientKind } from '@/app/lib/clients/models';
 
 import { ClientsTable } from '../clients-table';
-import { LoadClientsForm } from '../load-clients-form';
 import { PdfSources } from '../pdf-sources';
 
 const DOCUMENTS = [
@@ -38,15 +37,6 @@ function expectList(kind: ClientKind) {
 describe('PdfSources', () => {
 	it.each(KINDS)('renders the exact entries for %s', (kind) => {
 		render(<PdfSources kind={kind} />);
-		expectList(kind);
-	});
-
-	it.each(KINDS)('is shown by LoadClientsForm for %s', (kind) => {
-		render(
-			<ClientsProvider>
-				<LoadClientsForm kind={kind} />
-			</ClientsProvider>,
-		);
 		expectList(kind);
 	});
 
