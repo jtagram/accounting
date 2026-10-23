@@ -1,0 +1,25 @@
+name: Disparar el deploy de accounting en local
+
+on:
+  push:
+    branches:
+      - local
+
+concurrency:
+  group: release-accounting-local
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Disparar el deploy de accounting en deploy-hub-api.
+    runs-on: ubuntu-latest
+    environment: local
+    steps:
+      - name: Disparar el workflow de deploy local de accounting en deploy-hub-api.
+        env:
+          GH_TOKEN: ${{ secrets.DISPATCH_DEPLOY_HUB_API_LOCAL }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: gh workflow run deploy-accounting-local.yml --repo "$REPOSITORY_OWNER/deploy-hub-api" --ref local
