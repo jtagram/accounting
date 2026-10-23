@@ -47,7 +47,7 @@ describe('LoadClientsForm', () => {
 		await userEvent.click(load);
 
 		expect(await screen.findByRole('status')).toHaveTextContent(
-			'Se cargaron 2 clientes en memoria.',
+			'Se cargaron 2 clientes en memoria. La lista se borra automáticamente a las 2 horas.',
 		);
 		expect(textarea).toHaveValue('');
 		expect(screen.getByText('ana')).toBeInTheDocument();
@@ -76,7 +76,7 @@ describe('LoadClientsForm', () => {
 		await userEvent.click(load);
 
 		expect(await screen.findByRole('status')).toHaveTextContent(
-			'Se cargaron 1 clientes en memoria.',
+			'Se cargaron 1 clientes en memoria. La lista se borra automáticamente a las 2 horas.',
 		);
 		expect(screen.getByText('desde archivo')).toBeInTheDocument();
 	});

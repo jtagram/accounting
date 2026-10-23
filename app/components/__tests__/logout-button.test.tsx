@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { ClientsProvider, useClients } from '@/app/lib/clients/clients-provider';
 
 import { LogoutButton } from '../logout-button';
 
@@ -22,7 +25,45 @@ afterEach(() => {
 	vi.clearAllMocks();
 });
 
+function Seed() {
+	const { replace } = useClients('arca');
+	useEffect(() => {
+		replace([{ nombre: 'n', cuit: '20123456789', claveFiscal: 'k' }]);
+	}, []);
+	return null;
+}
+
+function Probe({ onRender }: { onRender: (count: number) => void }) {
+	onRender(useClients('arca').clients.length);
+	return null;
+}
+
 describe('LogoutButton', () => {
+	it('wipes all client lists before navigating to /login', async () => {
+		let resolveFetch!: (value: Response) => void;
+		fetchMock.mockReturnValue(
+			new Promise<Response>((resolve) => {
+				resolveFetch = resolve;
+			}),
+		);
+		const counts: number[] = [];
+		render(
+			<ClientsProvider>
+				<Seed />
+				<Probe onRender={(count) => counts.push(count)} />
+				<LogoutButton />
+			</ClientsProvider>,
+		);
+		expect(counts.at(-1)).toBe(1);
+
+		await userEvent.setup().click(screen.getByRole('button', { name: 'Cerrar sesión' }));
+
+		expect(counts.at(-1)).toBe(0);
+		expect(push).not.toHaveBeenCalled();
+		resolveFetch(new Response(JSON.stringify({ ok: true })));
+		await waitFor(() => expect(push).toHaveBeenCalledWith('/login'));
+	});
+
 	it('calls the logout endpoint and redirects to /login', async () => {
 		fetchMock.mockResolvedValue(new Response(JSON.stringify({ ok: true })));
 		render(<LogoutButton />);

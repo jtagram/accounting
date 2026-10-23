@@ -80,4 +80,17 @@ describe('ClientsTable', () => {
 		expect(screen.getByText(/No hay clientes cargados/)).toBeInTheDocument();
 		expect(screen.queryByText('juan perez')).not.toBeInTheDocument();
 	});
+
+	it('shows when the list will be erased (HH:mm)', () => {
+		render(
+			<ClientsProvider>
+				<Seed
+					kind='arca'
+					clients={arca}
+				/>
+				<ClientsTable kind='arca' />
+			</ClientsProvider>,
+		);
+		expect(screen.getByText(/^La lista se borra automáticamente a las \d{2}:\d{2}\.$/)).toBeInTheDocument();
+	});
 });

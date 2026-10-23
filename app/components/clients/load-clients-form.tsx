@@ -115,7 +115,7 @@ export function LoadClientsForm({ kind }: { kind: ClientKind }) {
 					variant='success'
 					role='status'
 				>
-					{`Se cargaron ${feedback.count} clientes en memoria.`}
+					{`Se cargaron ${feedback.count} clientes en memoria. La lista se borra automáticamente a las 2 horas.`}
 				</Alert>
 			)}
 
