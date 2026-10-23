@@ -1,0 +1,22 @@
+# Reglas que ya cumple el valor por defecto de Prettier 3 y por eso no se configuran:
+# punto y coma al final (semi), espacio dentro de las llaves (bracketSpacing),
+# paréntesis alrededor del parámetro de una función flecha (arrowParens)
+# y el cierre de la etiqueta JSX en su propia línea cuando se reparte en varias (bracketSameLine)
+
+# Usa comillas simples en lugar de dobles en TypeScript
+singleQuote: true
+
+# Usa comillas simples en lugar de dobles en los atributos JSX
+jsxSingleQuote: true
+
+# Cada nivel de indentación equivale a un ancho de dos columnas
+tabWidth: 2
+
+# Indenta con el carácter tab en lugar de espacios
+useTabs: true
+
+# Largo máximo de línea antes de partirla en varias líneas
+printWidth: 100
+
+# Pone cada atributo JSX en su propia línea cuando la etiqueta tiene más de uno
+singleAttributePerLine: true
