@@ -13,8 +13,14 @@ function json(clients: unknown[]) {
 	return JSON.stringify({ clientes: clients });
 }
 
+const CUITS: Record<string, string> = {
+	ana: '20111111111',
+	beto: '20222222222',
+	carla: '20333333333',
+};
+
 function client(nombre: string, extra: Record<string, string> = { claveFiscal: SECRET }) {
-	return { nombre, cuit: '20123456789', ...extra };
+	return { nombre, cuit: CUITS[nombre] ?? '20444444444', ...extra };
 }
 
 function setup(kind: 'arca' | 'arca-agip' = 'arca') {
@@ -96,14 +102,41 @@ describe('LoadClientsForm', () => {
 		expect(screen.getByText('ana')).toBeInTheDocument();
 	});
 
-	it('shows a generic message for invalid JSON', async () => {
+	it('shows a located syntax error without echoing content and keeps the previous list', async () => {
 		const { textarea, load } = setup();
-		await paste(textarea, `not json ${SECRET}`);
+		await paste(textarea, json([client('ana')]));
+		await userEvent.click(load);
+		await screen.findByRole('status');
+
+		await paste(textarea, `{"clientes": [{"nombre": "${SECRET}"\n"cuit": 1}]}`);
 		await userEvent.click(load);
 
 		const alert = await screen.findByRole('alert');
-		expect(alert).toHaveTextContent('El contenido no es un JSON válido.');
+		expect(alert).toHaveTextContent(
+			'JSON inválido en la línea 2, columna 1: comillas inesperadas, probablemente falta una coma entre elementos.',
+		);
 		expect(alert).not.toHaveTextContent(SECRET);
+		expect(screen.getByText('ana')).toBeInTheDocument();
+		expect(screen.getByText('Clientes cargados: 1')).toBeInTheDocument();
+	});
+
+	it('rejects duplicate cuits and keeps the previous list', async () => {
+		const { textarea, load } = setup();
+		await paste(textarea, json([client('ana')]));
+		await userEvent.click(load);
+		await screen.findByRole('status');
+
+		const dup = { ...client('beto'), cuit: CUITS.carla };
+		await paste(textarea, json([client('carla'), dup]));
+		await userEvent.click(load);
+
+		const alert = await screen.findByRole('alert');
+		expect(alert).toHaveTextContent('Clientes 1 y 2: el cuit está repetido.');
+		expect(alert).not.toHaveTextContent(CUITS.carla);
+		expect(alert).not.toHaveTextContent(SECRET);
+		expect(screen.getByText('ana')).toBeInTheDocument();
+		expect(screen.queryByText('carla')).not.toBeInTheDocument();
+		expect(screen.getByText('Clientes cargados: 1')).toBeInTheDocument();
 	});
 
 	it('asks for input when nothing was provided', async () => {

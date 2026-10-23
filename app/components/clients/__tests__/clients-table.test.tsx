@@ -91,6 +91,8 @@ describe('ClientsTable', () => {
 				<ClientsTable kind='arca' />
 			</ClientsProvider>,
 		);
-		expect(screen.getByText(/^La lista se borra automáticamente a las \d{2}:\d{2}\.$/)).toBeInTheDocument();
+		expect(
+			screen.getByText(/^La lista se borra automáticamente a las \d{2}:\d{2}\.$/),
+		).toBeInTheDocument();
 	});
 });

@@ -2,7 +2,12 @@ import { act, renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { CLIENTS_TTL_MS, ClientsProvider, useClearAllClients, useClients } from '../clients-provider';
+import {
+	CLIENTS_TTL_MS,
+	ClientsProvider,
+	useClearAllClients,
+	useClients,
+} from '../clients-provider';
 import type { ArcaAgipClient, ArcaClient } from '../models';
 
 const wrapper = ({ children }: { children: ReactNode }) => (
