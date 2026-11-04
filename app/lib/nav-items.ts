@@ -1,7 +1,5 @@
 export type NavItemId =
-	| 'process-arca-clients'
-	| 'process-arca-agip-clients'
-	| 'process-arca-arba-clients';
+	'process-arca-clients' | 'process-arca-agip-clients' | 'process-arca-arba-clients';
 
 export interface NavItem {
 	id: NavItemId;
@@ -20,7 +18,13 @@ export interface NavGroup {
 export const NAV_GROUPS: NavGroup[] = [
 	{
 		title: 'ARCA',
-		items: [{ id: 'process-arca-clients', label: 'Procesar clientes ARCA', href: '/procesar-clientes-arca' }],
+		items: [
+			{
+				id: 'process-arca-clients',
+				label: 'Procesar clientes ARCA',
+				href: '/procesar-clientes-arca',
+			},
+		],
 	},
 	{
 		title: 'ARCA - AGIP',

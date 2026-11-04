@@ -50,7 +50,10 @@ type Feedback = { variant: 'success' | 'warning' | 'danger'; message: string };
 function feedbackFor(outcome: ProcessOutcome): Feedback {
 	switch (outcome.kind) {
 		case 'success':
-			return { variant: 'success', message: 'Proceso finalizado. Se descargó el ZIP con el resultado.' };
+			return {
+				variant: 'success',
+				message: 'Proceso finalizado. Se descargó el ZIP con el resultado.',
+			};
 		case 'errors-zip':
 			return {
 				variant: 'warning',
@@ -124,8 +127,8 @@ export function ClientsTable({ kind }: { kind: ClientKind }) {
 					variant='info'
 					role='note'
 				>
-					No hay clientes cargados en memoria. Seleccioná un archivo JSON con el selector de la esquina superior
-						derecha.
+					No hay clientes cargados en memoria. Seleccioná un archivo JSON con el selector de la
+					esquina superior derecha.
 				</Alert>
 			) : (
 				<>

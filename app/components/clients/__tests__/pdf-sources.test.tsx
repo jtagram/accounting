@@ -29,9 +29,13 @@ const KINDS = Object.keys(APPS) as ClientKind[];
 function expectList(kind: ClientKind) {
 	const region = screen.getByRole('region', { name: 'Origen de cada PDF' });
 	const rows = within(region).getAllByRole('row').slice(1);
-	expect(rows.map((row) => within(row).getAllByRole('cell').map((cell) => cell.textContent))).toEqual(
-		DOCUMENTS.map((document, index) => [document, APPS[kind][index]]),
-	);
+	expect(
+		rows.map((row) =>
+			within(row)
+				.getAllByRole('cell')
+				.map((cell) => cell.textContent),
+		),
+	).toEqual(DOCUMENTS.map((document, index) => [document, APPS[kind][index]]));
 }
 
 describe('PdfSources', () => {
@@ -53,7 +57,9 @@ describe('PdfSources', () => {
 		function Seed() {
 			const { replace } = useClients(kind);
 			useEffect(() => {
-				replace([{ nombre: 'ana', cuit: '20111111111', claveFiscal: 'x', claveCiudad: 'y', claveCit: 'z' }]);
+				replace([
+					{ nombre: 'ana', cuit: '20111111111', claveFiscal: 'x', claveCiudad: 'y', claveCit: 'z' },
+				]);
 			}, []);
 			return null;
 		}

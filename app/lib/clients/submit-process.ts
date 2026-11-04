@@ -1,7 +1,5 @@
 export type ProcessOutcome =
-	| { kind: 'success' }
-	| { kind: 'errors-zip' }
-	| { kind: 'error'; message: string };
+	{ kind: 'success' } | { kind: 'errors-zip' } | { kind: 'error'; message: string };
 
 const DEFAULT_ZIP_NAME = 'resultado.zip';
 
@@ -63,7 +61,10 @@ export async function submitProcess(kind: string, payload: unknown): Promise<Pro
 	if ((response.status === 201 || response.status === 500) && isZip(response)) {
 		try {
 			const blob = await response.blob();
-			downloadBlob(blob, filenameFromContentDisposition(response.headers.get('Content-Disposition')));
+			downloadBlob(
+				blob,
+				filenameFromContentDisposition(response.headers.get('Content-Disposition')),
+			);
 		} catch {
 			return { kind: 'error', message: 'No se pudo descargar el resultado. Intentá nuevamente.' };
 		}

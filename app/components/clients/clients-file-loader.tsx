@@ -10,7 +10,8 @@ import { parseClientsJson } from '@/app/lib/clients/validators';
 const MAX_VISIBLE_ERRORS = 10;
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 
-export type LoaderFeedback = { type: 'success'; count: number } | { type: 'error'; errors: string[] };
+export type LoaderFeedback =
+	{ type: 'success'; count: number } | { type: 'error'; errors: string[] };
 
 /** Compact file input + "Cargar" button. Reports its outcome through `onFeedback`. */
 export function ClientsFileLoader({

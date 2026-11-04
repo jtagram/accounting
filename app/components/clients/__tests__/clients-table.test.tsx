@@ -51,11 +51,11 @@ describe('ClientsTable', () => {
 		expect(screen.getByText('JUAN PEREZ')).toBeInTheDocument();
 		expect(screen.queryByText('juan perez')).not.toBeInTheDocument();
 		expect(screen.getByText('20123456789')).toBeInTheDocument();
-		expect(within(clientsTable()).getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
-			'',
-			'Nombre',
-			'CUIT',
-		]);
+		expect(
+			within(clientsTable())
+				.getAllByRole('columnheader')
+				.map((header) => header.textContent),
+		).toEqual(['', 'Nombre', 'CUIT']);
 		expect(screen.queryByText('top-secret')).not.toBeInTheDocument();
 		expect(screen.getByText('Clientes cargados: 1')).toBeInTheDocument();
 	});
