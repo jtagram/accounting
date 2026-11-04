@@ -2,12 +2,7 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 import { AUTH_COOKIE_NAME } from '@/app/lib/auth-cookie';
-import {
-	type BackendErrorBody,
-	extractErrorMessage,
-	readBackendBody,
-	UNREADABLE_BACKEND_BODY_STATUS,
-} from '@/app/lib/backend-proxy';
+import { readBackendBody, UNREADABLE_BACKEND_BODY_STATUS } from '@/app/lib/backend-proxy';
 import { requireEnv } from '@/app/lib/require-env';
 
 interface LoginRequestBody {
@@ -15,8 +10,11 @@ interface LoginRequestBody {
 	password?: string;
 }
 
-interface IamLoginSuccess {
-	access_token: string;
+/** IAM envelope: `{ ok, msg, data }`; `data` is `{ access_token }` on a successful login. */
+interface IamLoginEnvelope {
+	ok?: boolean;
+	msg?: string;
+	data?: { access_token?: string } | null;
 }
 
 export async function POST(request: Request) {
@@ -51,16 +49,17 @@ export async function POST(request: Request) {
 		body: JSON.stringify({ email, password }),
 	});
 
-	const data = await readBackendBody<Partial<IamLoginSuccess> & BackendErrorBody>(iamResponse);
+	const envelope = await readBackendBody<IamLoginEnvelope>(iamResponse);
 
 	if (!iamResponse.ok) {
 		return NextResponse.json(
-			{ message: extractErrorMessage(data, 'No se pudo iniciar sesión.') },
+			{ message: envelope?.msg || 'No se pudo iniciar sesión.' },
 			{ status: iamResponse.status },
 		);
 	}
 
-	if (!data?.access_token) {
+	const accessToken = envelope?.data?.access_token;
+	if (!envelope?.ok || !accessToken) {
 		return NextResponse.json(
 			{ message: 'No se pudo iniciar sesión.' },
 			{ status: UNREADABLE_BACKEND_BODY_STATUS },
@@ -68,7 +67,7 @@ export async function POST(request: Request) {
 	}
 
 	const cookieStore = await cookies();
-	cookieStore.set(AUTH_COOKIE_NAME, data.access_token, {
+	cookieStore.set(AUTH_COOKIE_NAME, accessToken, {
 		httpOnly: true,
 		sameSite: 'lax',
 		secure: process.env.NODE_ENV !== 'development',

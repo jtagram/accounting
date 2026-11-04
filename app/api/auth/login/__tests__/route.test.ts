@@ -61,7 +61,9 @@ describe('POST /api/auth/login', () => {
 	});
 
 	it('forwards the IAM error status and message', async () => {
-		fetchMock.mockResolvedValue(iamResponse({ message: 'Bad credentials' }, 401));
+		fetchMock.mockResolvedValue(
+			iamResponse({ ok: false, msg: 'Bad credentials', data: null }, 401),
+		);
 
 		const res = await POST(loginRequest({ email: 'a@b.com', password: 'x' }));
 
@@ -70,16 +72,8 @@ describe('POST /api/auth/login', () => {
 		expect(cookieSet).not.toHaveBeenCalled();
 	});
 
-	it('joins array messages from IAM', async () => {
-		fetchMock.mockResolvedValue(iamResponse({ message: ['one', 'two'] }, 400));
-
-		const res = await POST(loginRequest({ email: 'a@b.com', password: 'x' }));
-
-		expect(await res.json()).toEqual({ message: 'one, two' });
-	});
-
 	it('uses a fallback message when IAM sends none', async () => {
-		fetchMock.mockResolvedValue(iamResponse({}, 500));
+		fetchMock.mockResolvedValue(iamResponse({ ok: false, msg: '', data: null }, 500));
 
 		const res = await POST(loginRequest({ email: 'a@b.com', password: 'x' }));
 
@@ -89,7 +83,9 @@ describe('POST /api/auth/login', () => {
 	});
 
 	it('sets the auth cookie and returns ok on success', async () => {
-		fetchMock.mockResolvedValue(iamResponse({ access_token: 'tok123' }));
+		fetchMock.mockResolvedValue(
+			iamResponse({ ok: true, msg: 'ok', data: { access_token: 'tok123' } }),
+		);
 
 		const res = await POST(loginRequest({ email: 'a@b.com', password: 'x' }));
 
@@ -116,7 +112,9 @@ describe('POST /api/auth/login', () => {
 	});
 
 	it('marks the cookie secure unless running in development', async () => {
-		fetchMock.mockImplementation(() => Promise.resolve(iamResponse({ access_token: 'tok123' })));
+		fetchMock.mockImplementation(() =>
+			Promise.resolve(iamResponse({ ok: true, msg: 'ok', data: { access_token: 'tok123' } })),
+		);
 
 		vi.stubEnv('NODE_ENV', 'production');
 		await POST(loginRequest({ email: 'a@b.com', password: 'x' }));
@@ -159,7 +157,7 @@ describe('POST /api/auth/login', () => {
 	});
 
 	it('returns 502 and sets no cookie when IAM returns no access_token', async () => {
-		fetchMock.mockResolvedValue(iamResponse({}));
+		fetchMock.mockResolvedValue(iamResponse({ ok: true, msg: 'ok', data: null }));
 
 		const res = await POST(loginRequest({ email: 'a@b.com', password: 'x' }));
 
